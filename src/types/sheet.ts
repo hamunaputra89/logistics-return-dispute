@@ -21,7 +21,7 @@ export interface ReturnRecord {
   catatan: string; // Col 17: catatan
   
   // Computed helpers
-  courier: 'Ninja' | 'J&T' | 'Shopee Express' | 'J&T Cargo' | 'Other' | 'Unknown';
+  courier: 'JNE' | 'J&T' | 'Shopee Express' | 'J&T Cargo' | 'Other' | 'Unknown';
   categoryType: 'fraud' | 'damage' | 'unsealed' | 'courier_issue' | 'normal' | 'other';
   hasEvidence: boolean;
   evidenceUrl?: string;
@@ -30,7 +30,7 @@ export interface ReturnRecord {
 }
 
 export type CategoryFilter = 'all' | 'fraud' | 'damage' | 'unsealed' | 'courier_issue' | 'normal';
-export type CourierFilter = 'all' | 'Ninja' | 'J&T' | 'Shopee Express' | 'Other';
+export type CourierFilter = 'all' | 'JNE' | 'J&T' | 'Shopee Express' | 'Other';
 export type SlocFilter = 'all' | '1655' | '1653' | 'other';
 export type StatusFilter = 'all' | 'done' | 'pending';
 

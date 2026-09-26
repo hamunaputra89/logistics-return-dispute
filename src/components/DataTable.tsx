@@ -304,7 +304,7 @@ export const DataTable: React.FC<DataTableProps> = ({
             className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:border-blue-500"
           >
             <option value="all">Semua Kurir</option>
-            <option value="Ninja">Ninja Xpress (TG)</option>
+            <option value="JNE">JNE (TG)</option>
             <option value="J&T">J&T Express (JX)</option>
             <option value="Shopee Express">Shopee Express (SPX)</option>
             <option value="Other">Lainnya / Cargo</option>
@@ -466,8 +466,8 @@ export const DataTable: React.FC<DataTableProps> = ({
                       <div className="flex items-center gap-1 mt-0.5">
                         <span
                           className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                            r.courier === 'Ninja'
-                              ? 'bg-rose-100 text-rose-800'
+                            r.courier === 'JNE'
+                              ? 'bg-blue-100 text-blue-800'
                               : r.courier === 'J&T'
                               ? 'bg-red-100 text-red-800'
                               : r.courier === 'Shopee Express'

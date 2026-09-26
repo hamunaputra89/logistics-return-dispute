@@ -33,7 +33,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
   // Courier totals calculation
   const totalCourierShipments = Object.values(stats.courierCounts).reduce((a, b) => a + b, 0) || 1;
   const courierList = [
-    { name: 'Ninja (TG)', key: 'Ninja', count: stats.courierCounts['Ninja'] || 0, color: 'bg-rose-500' },
+    { name: 'JNE (TG)', key: 'JNE', count: stats.courierCounts['JNE'] || 0, color: 'bg-blue-600' },
     { name: 'J&T (JX)', key: 'J&T', count: stats.courierCounts['J&T'] || 0, color: 'bg-red-600' },
     { name: 'Shopee Express (SPX)', key: 'Shopee Express', count: stats.courierCounts['Shopee Express'] || 0, color: 'bg-orange-500' },
     { name: 'Lainnya / Cargo', key: 'Other', count: (stats.courierCounts['Other'] || 0) + (stats.courierCounts['J&T Cargo'] || 0), color: 'bg-slate-500' },
@@ -199,7 +199,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                   Proporsi Retur per Ekspedisi Kurir
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Dideteksi otomatis dari kode awalan resi pengiriman (TG = Ninja, JX = J&T, SPX = Shopee).
+                  Dideteksi otomatis dari kode awalan resi pengiriman (TG = JNE, JX = J&T, SPX = Shopee).
                 </p>
               </div>
             </div>
@@ -240,9 +240,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                 </h4>
                 <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
                   <div className="flex items-start gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 shrink-0" />
                     <span>
-                      <strong className="text-slate-900">Ninja Xpress (TG)</strong> mendominasi volume pengembalian terbesar dengan lebih dari 50% total retur terdata.
+                      <strong className="text-slate-900">JNE (TG)</strong> mendominasi volume pengembalian terbesar dengan lebih dari 50% total retur terdata.
                     </span>
                   </div>
                   <div className="flex items-start gap-2">

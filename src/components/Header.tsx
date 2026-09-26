@@ -54,13 +54,17 @@ export const Header: React.FC<HeaderProps> = ({
               <FileSpreadsheet className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight text-slate-900">
                   Semarang Return & Dispute Hub
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {isLiveConnected ? 'Live Sheet' : 'Public Sync'}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-50 to-orange-50 text-amber-900 border border-amber-200/80 shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-amber-600" />
+                  <span>Handcraft with <strong className="text-slate-900 font-bold">Hery</strong></span>
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex items-center gap-2 mt-0.5">

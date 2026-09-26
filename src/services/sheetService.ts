@@ -58,7 +58,7 @@ export function parseCSV(text: string): string[][] {
  */
 export function detectCourier(resi: string, resiRetur: string): ReturnRecord['courier'] {
   const code = (resi || resiRetur || '').toUpperCase();
-  if (code.startsWith('TG')) return 'Ninja';
+  if (code.startsWith('TG')) return 'JNE';
   if (code.startsWith('JX')) return 'J&T';
   if (code.startsWith('SPX')) return 'Shopee Express';
   if (code.startsWith('JP')) return 'J&T Cargo';
@@ -359,7 +359,7 @@ export function computeSheetStats(records: ReturnRecord[]): SheetStats {
   let handoverDocCount = 0;
 
   const courierCounts: { [key: string]: number } = {
-    Ninja: 0,
+    JNE: 0,
     'J&T': 0,
     'Shopee Express': 0,
     'J&T Cargo': 0,

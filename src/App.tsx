@@ -11,6 +11,7 @@ import {
   TrendingDown,
   Layers,
   Sparkles,
+  Heart,
 } from 'lucide-react';
 import {
   ReturnRecord,
@@ -283,7 +284,7 @@ export default function App() {
         tglJamPacking: data.tglJamPacking,
         catatan: data.catatan,
         courier: (data.resiOriginal.startsWith('TG')
-          ? 'Ninja'
+          ? 'JNE'
           : data.resiOriginal.startsWith('JX')
           ? 'J&T'
           : data.resiOriginal.startsWith('SPX')
@@ -468,8 +469,16 @@ export default function App() {
 
       {/* Footer */}
       <footer className="mt-auto border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© 2026 Semarang Fulfillment & Logistics Operations Hub • Live Google Sheets Sync</p>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <p>© 2026 Semarang Fulfillment & Logistics Operations Hub • Live Google Sheets Sync</p>
+            <span className="hidden sm:inline text-slate-300">•</span>
+            <p className="flex items-center gap-1 font-medium text-slate-700">
+              <span>Handcrafted with</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
+              <span>by <strong className="text-slate-900">Hery</strong></span>
+            </p>
+          </div>
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1 text-slate-600">
               <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />

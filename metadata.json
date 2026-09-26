@@ -2,5 +2,7 @@
   "name": "Logistics Return & Dispute Analytics",
   "description": "Real-time dashboard and analytics for return shipments, dispute tracking, handover documents, and Google Sheets live integration.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
