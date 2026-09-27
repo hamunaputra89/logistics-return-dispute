@@ -238,10 +238,63 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                         </a>
                       </div>
                     </div>
+                  ) : record.isDocSanggahanVideoFile || record.docSanggahan.toLowerCase().includes('.mp4') || record.docSanggahan.toLowerCase().startsWith('unboxing') ? (
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetUrl =
+                            record.docSanggahanUrl ||
+                            (record.isDriveLink
+                              ? record.evidenceUrl!
+                              : `https://drive.google.com/drive/search?q=${encodeURIComponent(record.docSanggahan)}`);
+                          if (onPlayVideo) {
+                            onPlayVideo(targetUrl, record, `Kolom H - ${record.docSanggahan}`);
+                          } else {
+                            window.open(targetUrl, '_blank');
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-xs"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white" />
+                        <span className="truncate max-w-[200px]">Putar Video: {record.docSanggahan}</span>
+                      </button>
+                      <div>
+                        <a
+                          href={
+                            record.docSanggahanUrl ||
+                            (record.isDriveLink
+                              ? record.evidenceUrl
+                              : `https://drive.google.com/drive/search?q=${encodeURIComponent(record.docSanggahan)}`)
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-indigo-600 hover:underline font-medium"
+                        >
+                          <span>Cari Berkas di Google Drive</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
                   ) : (
-                    <span className="font-mono font-semibold text-slate-900">
-                      {record.docSanggahan || '-'}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono font-semibold text-slate-900">
+                        {record.docSanggahan || '-'}
+                      </span>
+                      {record.docSanggahan && record.docSanggahan !== '-' && (
+                        <button
+                          onClick={() => handleCopy('docSanggahan', record.docSanggahan)}
+                          className="p-1 text-slate-400 hover:text-blue-600 rounded transition-colors"
+                          title="Salin Dokumen Sanggahan"
+                        >
+                          {copiedField === 'docSanggahan' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div>

@@ -133,6 +133,33 @@ export const GoogleVideoPlayerModal: React.FC<GoogleVideoPlayerModalProps> = ({
             >
               Browser Anda tidak mendukung pemutar video HTML5.
             </video>
+          ) : videoUrl.includes('/drive/search') ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-4">
+                <Video className="w-8 h-8" />
+              </div>
+              <h4 className="text-base font-bold text-white mb-1">
+                Berkas Video Sanggahan / Unboxing
+              </h4>
+              <p className="text-xs text-slate-300 font-mono mb-4 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-700">
+                {title.replace('Video Sanggahan / Unboxing', '').replace(/[()]/g, '').trim() || videoUrl}
+              </p>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                Berkas video ini tersimpan di Google Drive. Klik tombol di bawah untuk langsung membuka dan memutar rekaman video di Google Drive.
+              </p>
+              <div className="flex items-center gap-3">
+                <a
+                  href={videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md transition-all hover:scale-105"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>Buka Video di Google Drive</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
           ) : (
             <iframe
               src={embedUrl}

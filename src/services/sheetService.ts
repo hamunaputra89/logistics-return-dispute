@@ -204,20 +204,43 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
     const hasEvidence = isDriveLink || isCctvFile || notedApaKee.length > 5;
 
     // Detect if Kolom H (Doc Sanggahan) contains a URL or Google Video link
+    const cleanDocH = docSanggahan.trim();
     const isDocSanggahanLink =
-      docSanggahan !== 'On Proses' &&
-      (docSanggahan.startsWith('http://') ||
-        docSanggahan.startsWith('https://') ||
-        docSanggahan.includes('drive.google.com') ||
-        docSanggahan.includes('youtu.be') ||
-        docSanggahan.includes('youtube.com'));
+      cleanDocH !== 'On Proses' &&
+      cleanDocH !== 'Tidak ditemukan' &&
+      (cleanDocH.startsWith('http://') ||
+        cleanDocH.startsWith('https://') ||
+        cleanDocH.includes('drive.google.com') ||
+        cleanDocH.includes('docs.google.com') ||
+        cleanDocH.includes('photos.app.goo.gl') ||
+        cleanDocH.includes('youtu.be') ||
+        cleanDocH.includes('youtube.com') ||
+        cleanDocH.includes('goo.gl') ||
+        cleanDocH.includes('/file/d/'));
+
+    // Detect if Kolom H is a video filename (e.g. TG3562759676.mp4 or unboxing...)
+    const isDocSanggahanVideoFile =
+      cleanDocH !== 'On Proses' &&
+      cleanDocH !== 'Tidak ditemukan' &&
+      !isDocSanggahanLink &&
+      (/\.(mp4|mov|mkv|webm|avi)($|\?|\s)/i.test(cleanDocH) ||
+        cleanDocH.toLowerCase().includes('.mp4') ||
+        cleanDocH.toLowerCase().startsWith('unboxing'));
 
     const docSanggahanUrl = isDocSanggahanLink
-      ? (docSanggahan.startsWith('http') ? docSanggahan : `https://${docSanggahan}`)
+      ? cleanDocH.startsWith('http')
+        ? cleanDocH
+        : `https://${cleanDocH}`
+      : isDocSanggahanVideoFile
+      ? isDriveLink
+        ? notedApaKee.trim()
+        : `https://drive.google.com/drive/search?q=${encodeURIComponent(cleanDocH)}`
       : undefined;
 
-    const docSanggahanEmbedUrl = docSanggahanUrl
+    const docSanggahanEmbedUrl = isDocSanggahanLink && docSanggahanUrl
       ? getGoogleVideoEmbedUrl(docSanggahanUrl) || undefined
+      : isDocSanggahanVideoFile && isDriveLink
+      ? getGoogleVideoEmbedUrl(notedApaKee.trim()) || undefined
       : undefined;
 
     records.push({
@@ -248,6 +271,7 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
       isDriveLink,
       isCctvFile,
       isDocSanggahanLink,
+      isDocSanggahanVideoFile,
       docSanggahanUrl,
       docSanggahanEmbedUrl,
     });

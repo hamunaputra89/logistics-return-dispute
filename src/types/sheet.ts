@@ -28,6 +28,7 @@ export interface ReturnRecord {
   isDriveLink: boolean;
   isCctvFile: boolean;
   isDocSanggahanLink?: boolean;
+  isDocSanggahanVideoFile?: boolean;
   docSanggahanUrl?: string;
   docSanggahanEmbedUrl?: string;
 }

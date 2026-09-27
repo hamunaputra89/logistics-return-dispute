@@ -387,7 +387,8 @@ export const DataTable: React.FC<DataTableProps> = ({
               </th>
               <th className="py-3 px-3.5">Resi Retur & DN</th>
               <th className="py-3 px-3.5">SKU & IMEI</th>
-              <th className="py-3 px-3.5">Kasus / Sanggahan</th>
+              <th className="py-3 px-3.5">Kasus (Update Case)</th>
+              <th className="py-3 px-3.5 text-blue-700 bg-blue-50/50">Doc Sanggahan (Kolom H)</th>
               <th className="py-3 px-3.5">Sloc</th>
               <th className="py-3 px-3.5">Handover & CCTV</th>
               <th className="py-3 px-3.5">Packer</th>
@@ -406,7 +407,7 @@ export const DataTable: React.FC<DataTableProps> = ({
           <tbody className="divide-y divide-slate-200/70">
             {pagedRecords.length === 0 ? (
               <tr>
-                <td colSpan={11} className="py-12 text-center text-slate-500">
+                <td colSpan={12} className="py-12 text-center text-slate-500">
                   <div className="max-w-xs mx-auto space-y-2">
                     <HelpCircle className="w-8 h-8 text-slate-400 mx-auto" />
                     <p className="font-semibold text-slate-700">Tidak ada data ditemukan</p>
@@ -504,8 +505,8 @@ export const DataTable: React.FC<DataTableProps> = ({
                       </div>
                     </td>
 
-                    {/* Update Case & Sanggahan */}
-                    <td className="py-3 px-3.5 max-w-[210px]">
+                    {/* Update Case (Kasus) */}
+                    <td className="py-3 px-3.5 max-w-[200px]">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {isFraud && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-700 shrink-0">
@@ -531,37 +532,79 @@ export const DataTable: React.FC<DataTableProps> = ({
                           {r.updateCase || r.keterangan || '-'}
                         </span>
                       </div>
-                      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] text-slate-400">Doc:</span>
-                        {r.docSanggahan === 'On Proses' ? (
-                          <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                            On Proses
-                          </span>
-                        ) : r.isDocSanggahanLink || r.docSanggahan.startsWith('http') || r.docSanggahan.includes('drive.google.com') ? (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const targetUrl = r.docSanggahanUrl || r.docSanggahan;
-                              if (onPlayVideo) {
-                                onPlayVideo(targetUrl, r, 'Kolom H - Dokumen Sanggahan');
-                              } else {
-                                window.open(targetUrl, '_blank');
-                              }
-                            }}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-transform active:scale-95"
-                            title="Klik untuk langsung memutar video Google"
+                    </td>
+
+                    {/* Dedicated Column: Doc Sanggahan (Kolom H) */}
+                    <td className="py-3 px-3.5 whitespace-nowrap bg-blue-50/20">
+                      {r.docSanggahan === 'On Proses' ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                          On Proses
+                        </span>
+                      ) : r.isDocSanggahanLink || r.docSanggahan.startsWith('http') || r.docSanggahan.includes('drive.google.com') ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetUrl = r.docSanggahanUrl || r.docSanggahan;
+                            if (onPlayVideo) {
+                              onPlayVideo(targetUrl, r, 'Kolom H - Dokumen Sanggahan');
+                            } else {
+                              window.open(targetUrl, '_blank');
+                            }
+                          }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                          title="Klik untuk langsung memutar video Google"
+                        >
+                          <Play className="w-3 h-3 fill-white shrink-0" />
+                          <span>Putar Video Google</span>
+                          <ExternalLink className="w-3 h-3 opacity-80 shrink-0" />
+                        </button>
+                      ) : r.isDocSanggahanVideoFile || r.docSanggahan.toLowerCase().includes('.mp4') || r.docSanggahan.toLowerCase().startsWith('unboxing') ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetUrl =
+                              r.docSanggahanUrl ||
+                              (r.isDriveLink
+                                ? r.evidenceUrl!
+                                : `https://drive.google.com/drive/search?q=${encodeURIComponent(r.docSanggahan)}`);
+                            if (onPlayVideo) {
+                              onPlayVideo(targetUrl, r, `Kolom H - ${r.docSanggahan}`);
+                            } else {
+                              window.open(targetUrl, '_blank');
+                            }
+                          }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                          title="Klik untuk langsung memutar file video Google"
+                        >
+                          <Play className="w-3 h-3 fill-white shrink-0" />
+                          <span className="truncate max-w-[140px]">{r.docSanggahan}</span>
+                          <ExternalLink className="w-3 h-3 opacity-80 shrink-0" />
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <span
+                            className="font-mono text-xs font-semibold text-slate-800 truncate max-w-[140px]"
+                            title={r.docSanggahan}
                           >
-                            <Play className="w-2.5 h-2.5 fill-white" />
-                            <span>Putar Video Google</span>
-                            <ExternalLink className="w-2.5 h-2.5 opacity-80" />
-                          </button>
-                        ) : (
-                          <span className="font-mono text-[10px] text-slate-600 truncate max-w-[140px]" title={r.docSanggahan}>
                             {r.docSanggahan || '-'}
                           </span>
-                        )}
-                      </div>
+                          {r.docSanggahan && r.docSanggahan !== '-' && (
+                            <button
+                              onClick={(e) => handleCopy(r.docSanggahan, e)}
+                              className="text-slate-300 hover:text-slate-600 p-0.5"
+                              title="Salin Dokumen Sanggahan"
+                            >
+                              {copiedText === r.docSanggahan ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </td>
 
                     {/* Sloc */}
