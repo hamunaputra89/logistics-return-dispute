@@ -65,11 +65,17 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ stats, onFilterCategory }) =
             {donePercent}%
           </span>
         </div>
-        <div className="mt-2.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+        <div className="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
           <div
             className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
             style={{ width: `${donePercent}%` }}
           />
+        </div>
+        <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-500">
+          <span className="font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+            {stats.onProsesCount.toLocaleString()} On Proses
+          </span>
+          <span>{stats.doneCount.toLocaleString()} selesai</span>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 rounded-b-2xl" />
       </div>

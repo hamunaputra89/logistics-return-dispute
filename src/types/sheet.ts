@@ -27,6 +27,9 @@ export interface ReturnRecord {
   evidenceUrl?: string;
   isDriveLink: boolean;
   isCctvFile: boolean;
+  isDocSanggahanLink?: boolean;
+  docSanggahanUrl?: string;
+  docSanggahanEmbedUrl?: string;
 }
 
 export type CategoryFilter = 'all' | 'fraud' | 'damage' | 'unsealed' | 'courier_issue' | 'normal';
@@ -44,6 +47,7 @@ export interface SheetStats {
   courierIssueCount: number;
   hasEvidenceCount: number;
   handoverDocCount: number;
+  onProsesCount: number;
   courierCounts: { [key: string]: number };
   slocCounts: { [key: string]: number };
   packerCounts: { [key: string]: number };

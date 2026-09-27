@@ -12,15 +12,17 @@ import {
   FileSpreadsheet,
   AlertOctagon,
   ShieldAlert,
+  Play,
 } from 'lucide-react';
 import { ReturnRecord } from '../types/sheet';
 
 interface RecordDetailModalProps {
   record: ReturnRecord | null;
   onClose: () => void;
+  onPlayVideo?: (videoUrl: string, record: ReturnRecord, label?: string) => void;
 }
 
-export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, onClose }) => {
+export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, onClose, onPlayVideo }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   if (!record) return null;
@@ -200,7 +202,48 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div>
+                  <span className="text-slate-500 font-medium block mb-1">Doc Sanggahan (Kolom H)</span>
+                  {record.docSanggahan === 'On Proses' ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                      On Proses
+                    </span>
+                  ) : record.isDocSanggahanLink || record.docSanggahan.startsWith('http') || record.docSanggahan.includes('drive.google.com') ? (
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetUrl = record.docSanggahanUrl || record.docSanggahan;
+                          if (onPlayVideo) {
+                            onPlayVideo(targetUrl, record, 'Kolom H - Dokumen Sanggahan');
+                          } else {
+                            window.open(targetUrl, '_blank');
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-xs"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white" />
+                        <span>Putar Video Google</span>
+                      </button>
+                      <div>
+                        <a
+                          href={record.docSanggahanUrl || record.docSanggahan}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline font-medium"
+                        >
+                          <span>Buka di Google Drive</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="font-mono font-semibold text-slate-900">
+                      {record.docSanggahan || '-'}
+                    </span>
+                  )}
+                </div>
                 <div>
                   <span className="text-slate-500 font-medium block mb-1">Doc Handover</span>
                   <span className="font-mono font-semibold text-indigo-700">
@@ -234,15 +277,31 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                       </p>
                     </div>
                   </div>
-                  <a
-                    href={record.evidenceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shrink-0 shadow-xs"
-                  >
-                    <span>Buka Bukti Drive</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (record.evidenceUrl && onPlayVideo) {
+                          onPlayVideo(record.evidenceUrl, record, 'Kolom M - CCTV Bukti');
+                        } else if (record.evidenceUrl) {
+                          window.open(record.evidenceUrl, '_blank');
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-xs text-xs"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <span>Putar Video</span>
+                    </button>
+                    <a
+                      href={record.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors text-xs"
+                    >
+                      <span>Buka Drive</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
                 </div>
               ) : record.isCctvFile ? (
                 <div className="flex items-center justify-between">

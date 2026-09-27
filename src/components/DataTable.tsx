@@ -5,6 +5,7 @@ import {
   Download,
   ExternalLink,
   Video,
+  Play,
   Copy,
   Check,
   ChevronLeft,
@@ -27,6 +28,7 @@ import {
 interface DataTableProps {
   records: ReturnRecord[];
   onSelectRecord: (record: ReturnRecord) => void;
+  onPlayVideo?: (videoUrl: string, record: ReturnRecord, label?: string) => void;
   selectedCategoryFilter: CategoryFilter;
   onChangeCategoryFilter: (cat: CategoryFilter) => void;
   selectedCourierFilter: CourierFilter;
@@ -43,6 +45,7 @@ interface DataTableProps {
 export const DataTable: React.FC<DataTableProps> = ({
   records,
   onSelectRecord,
+  onPlayVideo,
   selectedCategoryFilter,
   onChangeCategoryFilter,
   selectedCourierFilter,
@@ -82,6 +85,7 @@ export const DataTable: React.FC<DataTableProps> = ({
           r.sku.toLowerCase().includes(q) ||
           r.updateCase.toLowerCase().includes(q) ||
           r.namaPacker.toLowerCase().includes(q) ||
+          r.docSanggahan.toLowerCase().includes(q) ||
           r.docHandover.toLowerCase().includes(q) ||
           r.noHo.toLowerCase().includes(q) ||
           r.keterangan.toLowerCase().includes(q);
@@ -501,7 +505,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                     </td>
 
                     {/* Update Case & Sanggahan */}
-                    <td className="py-3 px-3.5 max-w-[200px]">
+                    <td className="py-3 px-3.5 max-w-[210px]">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {isFraud && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-700 shrink-0">
@@ -526,6 +530,37 @@ export const DataTable: React.FC<DataTableProps> = ({
                         >
                           {r.updateCase || r.keterangan || '-'}
                         </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] text-slate-400">Doc:</span>
+                        {r.docSanggahan === 'On Proses' ? (
+                          <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            On Proses
+                          </span>
+                        ) : r.isDocSanggahanLink || r.docSanggahan.startsWith('http') || r.docSanggahan.includes('drive.google.com') ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const targetUrl = r.docSanggahanUrl || r.docSanggahan;
+                              if (onPlayVideo) {
+                                onPlayVideo(targetUrl, r, 'Kolom H - Dokumen Sanggahan');
+                              } else {
+                                window.open(targetUrl, '_blank');
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-transform active:scale-95"
+                            title="Klik untuk langsung memutar video Google"
+                          >
+                            <Play className="w-2.5 h-2.5 fill-white" />
+                            <span>Putar Video Google</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-80" />
+                          </button>
+                        ) : (
+                          <span className="font-mono text-[10px] text-slate-600 truncate max-w-[140px]" title={r.docSanggahan}>
+                            {r.docSanggahan || '-'}
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -552,16 +587,34 @@ export const DataTable: React.FC<DataTableProps> = ({
                         </div>
                       )}
                       {r.isDriveLink ? (
-                        <a
-                          href={r.evidenceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline mt-0.5"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          <span>Buka Drive</span>
-                        </a>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (r.evidenceUrl && onPlayVideo) {
+                                onPlayVideo(r.evidenceUrl, r, 'Kolom M - CCTV Bukti');
+                              } else if (r.evidenceUrl) {
+                                window.open(r.evidenceUrl, '_blank');
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                            title="Putar video CCTV Google Drive"
+                          >
+                            <Play className="w-2.5 h-2.5 fill-current" />
+                            <span>Putar Video</span>
+                          </button>
+                          <a
+                            href={r.evidenceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-slate-400 hover:text-slate-600 p-0.5"
+                            title="Buka Drive di tab baru"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       ) : r.isCctvFile ? (
                         <div
                           className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-700 mt-0.5 max-w-[120px] truncate"

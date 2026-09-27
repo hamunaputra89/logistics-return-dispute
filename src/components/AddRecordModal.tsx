@@ -15,7 +15,7 @@ import { detectCourier, categorizeCase } from '../services/sheetService';
 interface AddRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (newRecord: Omit<ReturnRecord, 'id' | 'rowIndex' | 'courier' | 'categoryType' | 'hasEvidence' | 'isDriveLink' | 'isCctvFile'>) => Promise<void>;
+  onSubmit: (newRecord: Omit<ReturnRecord, 'id' | 'rowIndex' | 'courier' | 'categoryType' | 'hasEvidence' | 'isDriveLink' | 'isCctvFile' | 'isDocSanggahanLink' | 'docSanggahanUrl' | 'docSanggahanEmbedUrl'>) => Promise<void>;
   hasGoogleToken: boolean;
   isSubmitting: boolean;
   onLoginGoogle?: () => void;
@@ -64,7 +64,7 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
     sku: '',
     imei: '',
     sloc: '1655',
-    docSanggahan: '',
+    docSanggahan: 'On Proses',
     updateCase: '',
     keterangan: '',
     docHandover: '',
@@ -119,7 +119,7 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
         sku: form.sku.trim(),
         imei: form.imei.trim(),
         sloc: form.sloc || '1655',
-        docSanggahan: form.docSanggahan.trim(),
+        docSanggahan: form.docSanggahan.trim() || 'On Proses',
         updateCase: form.updateCase.trim(),
         keterangan: form.keterangan.trim(),
         docHandover: form.docHandover.trim(),
@@ -374,9 +374,22 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
           {/* Section 4: Handover Serah Terima & Bukti CCTV/Drive */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-              4. Serah Terima (Handover) & Bukti Dokumentasi
+              4. Dokumen Sanggahan, Serah Terima & Bukti CCTV
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  Doc Sanggahan (Kolom H)
+                </label>
+                <input
+                  type="text"
+                  placeholder="On Proses (default)"
+                  value={form.docSanggahan}
+                  onChange={(e) => setForm({ ...form, docSanggahan: e.target.value })}
+                  className="w-full font-mono text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-slate-600 font-medium">Doc Handover</label>

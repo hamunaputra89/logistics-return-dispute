@@ -26,6 +26,7 @@ import {
   appendSheetRecord,
   computeSheetStats,
   SPREADSHEET_URL,
+  getGoogleVideoEmbedUrl,
 } from './services/sheetService';
 import {
   initAuth,
@@ -40,6 +41,7 @@ import { DataTable } from './components/DataTable';
 import { RecordDetailModal } from './components/RecordDetailModal';
 import { AddRecordModal } from './components/AddRecordModal';
 import { ConfirmationDialog } from './components/ConfirmationDialog';
+import { GoogleVideoPlayerModal } from './components/GoogleVideoPlayerModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
 export default function App() {
@@ -69,6 +71,21 @@ export default function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<ReturnRecord | null>(null);
   const [isSubmittingRecord, setIsSubmittingRecord] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<{
+    url: string;
+    title: string;
+    sourceLabel: string;
+    resiOriginal?: string;
+  } | null>(null);
+
+  const handlePlayVideo = (videoUrl: string, record: ReturnRecord, label?: string) => {
+    setActiveVideo({
+      url: videoUrl,
+      title: `Video Sanggahan / Unboxing (${record.resiOriginal || record.resiRetur || 'Retur'})`,
+      sourceLabel: label || 'Kolom H - Dokumen Sanggahan',
+      resiOriginal: record.resiOriginal,
+    });
+  };
 
   // User Confirmation Dialog State (for Google Workspace API mutation compliance)
   const [confirmModal, setConfirmModal] = useState<{
@@ -139,7 +156,7 @@ export default function App() {
 
         setStats(computeSheetStats(res.records));
         setLastUpdated(new Date());
-        setIsLiveConnected(res.source === 'api');
+        setIsLiveConnected(res.source === 'api' || res.source === 'csv');
       } catch (err: any) {
         console.error('Failed to load sheet data:', err);
         setLoadError(err.message || 'Gagal memuat data dari spreadsheet');
@@ -272,7 +289,7 @@ export default function App() {
         sku: data.sku,
         imei: data.imei,
         sloc: data.sloc,
-        docSanggahan: data.docSanggahan,
+        docSanggahan: data.docSanggahan?.trim() ? data.docSanggahan.trim() : 'On Proses',
         updateCase: data.updateCase,
         keterangan: data.keterangan,
         docHandover: data.docHandover,
@@ -302,6 +319,23 @@ export default function App() {
         evidenceUrl: data.notedApaKee.includes('drive.google.com') ? data.notedApaKee : undefined,
         isDriveLink: data.notedApaKee.includes('drive.google.com'),
         isCctvFile: data.notedApaKee.toLowerCase().includes('.mp4'),
+        isDocSanggahanLink:
+          data.docSanggahan !== 'On Proses' &&
+          (data.docSanggahan.startsWith('http://') ||
+            data.docSanggahan.startsWith('https://') ||
+            data.docSanggahan.includes('drive.google.com')),
+        docSanggahanUrl:
+          data.docSanggahan !== 'On Proses' &&
+          (data.docSanggahan.startsWith('http') || data.docSanggahan.includes('drive.google.com'))
+            ? data.docSanggahan.startsWith('http')
+              ? data.docSanggahan
+              : `https://${data.docSanggahan}`
+            : undefined,
+        docSanggahanEmbedUrl:
+          data.docSanggahan !== 'On Proses' &&
+          (data.docSanggahan.startsWith('http') || data.docSanggahan.includes('drive.google.com'))
+            ? getGoogleVideoEmbedUrl(data.docSanggahan) || undefined
+            : undefined,
       };
 
       setRecords((prev) => [newRecord, ...prev]);
@@ -451,6 +485,7 @@ export default function App() {
             <DataTable
               records={records}
               onSelectRecord={(r) => setSelectedRecord(r)}
+              onPlayVideo={handlePlayVideo}
               selectedCategoryFilter={categoryFilter}
               onChangeCategoryFilter={setCategoryFilter}
               selectedCourierFilter={courierFilter}
@@ -501,6 +536,17 @@ export default function App() {
       <RecordDetailModal
         record={selectedRecord}
         onClose={() => setSelectedRecord(null)}
+        onPlayVideo={handlePlayVideo}
+      />
+
+      {/* Google Video Player Modal */}
+      <GoogleVideoPlayerModal
+        isOpen={!!activeVideo}
+        onClose={() => setActiveVideo(null)}
+        videoUrl={activeVideo?.url || null}
+        title={activeVideo?.title}
+        sourceLabel={activeVideo?.sourceLabel}
+        resiOriginal={activeVideo?.resiOriginal}
       />
 
       {/* Add New Record Modal */}
