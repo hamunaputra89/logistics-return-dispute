@@ -82,7 +82,7 @@ export default function App() {
     setActiveVideo({
       url: videoUrl,
       title: `Video Sanggahan / Unboxing (${record.resiOriginal || record.resiRetur || 'Retur'})`,
-      sourceLabel: label || 'Kolom H - Dokumen Sanggahan',
+      sourceLabel: label || 'Doc Sanggahan',
       resiOriginal: record.resiOriginal,
     });
   };

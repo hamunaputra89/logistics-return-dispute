@@ -204,7 +204,7 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div>
-                  <span className="text-slate-500 font-medium block mb-1">Doc Sanggahan (Kolom H)</span>
+                  <span className="text-slate-500 font-medium block mb-1">Doc Sanggahan</span>
                   {record.docSanggahan === 'On Proses' ? (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
                       On Proses
@@ -216,7 +216,7 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                         onClick={() => {
                           const targetUrl = record.docSanggahanUrl || record.docSanggahan;
                           if (onPlayVideo) {
-                            onPlayVideo(targetUrl, record, 'Kolom H - Dokumen Sanggahan');
+                            onPlayVideo(targetUrl, record, 'Doc Sanggahan');
                           } else {
                             window.open(targetUrl, '_blank');
                           }
@@ -249,7 +249,7 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                               ? record.evidenceUrl!
                               : `https://drive.google.com/drive/search?q=${encodeURIComponent(record.docSanggahan)}`);
                           if (onPlayVideo) {
-                            onPlayVideo(targetUrl, record, `Kolom H - ${record.docSanggahan}`);
+                            onPlayVideo(targetUrl, record, `Doc Sanggahan: ${record.docSanggahan}`);
                           } else {
                             window.open(targetUrl, '_blank');
                           }

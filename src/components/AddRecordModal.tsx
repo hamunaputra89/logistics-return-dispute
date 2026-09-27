@@ -379,7 +379,7 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="block text-slate-600 font-medium mb-1">
-                  Doc Sanggahan (Kolom H)
+                  Doc Sanggahan
                 </label>
                 <input
                   type="text"

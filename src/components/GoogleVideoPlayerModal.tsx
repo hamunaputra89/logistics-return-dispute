@@ -25,7 +25,7 @@ export const GoogleVideoPlayerModal: React.FC<GoogleVideoPlayerModalProps> = ({
   onClose,
   videoUrl,
   title = 'Pemutar Video Google',
-  sourceLabel = 'Kolom H - Dokumen Sanggahan',
+  sourceLabel = 'Doc Sanggahan',
   resiOriginal,
 }) => {
   const [copied, setCopied] = useState(false);

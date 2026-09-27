@@ -388,7 +388,7 @@ export const DataTable: React.FC<DataTableProps> = ({
               <th className="py-3 px-3.5">Resi Retur & DN</th>
               <th className="py-3 px-3.5">SKU & IMEI</th>
               <th className="py-3 px-3.5">Kasus (Update Case)</th>
-              <th className="py-3 px-3.5 text-blue-700 bg-blue-50/50">Doc Sanggahan (Kolom H)</th>
+              <th className="py-3 px-3.5 text-blue-700 bg-blue-50/50">Doc Sanggahan</th>
               <th className="py-3 px-3.5">Sloc</th>
               <th className="py-3 px-3.5">Handover & CCTV</th>
               <th className="py-3 px-3.5">Packer</th>
@@ -547,7 +547,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                             e.stopPropagation();
                             const targetUrl = r.docSanggahanUrl || r.docSanggahan;
                             if (onPlayVideo) {
-                              onPlayVideo(targetUrl, r, 'Kolom H - Dokumen Sanggahan');
+                              onPlayVideo(targetUrl, r, 'Doc Sanggahan');
                             } else {
                               window.open(targetUrl, '_blank');
                             }
@@ -570,7 +570,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                                 ? r.evidenceUrl!
                                 : `https://drive.google.com/drive/search?q=${encodeURIComponent(r.docSanggahan)}`);
                             if (onPlayVideo) {
-                              onPlayVideo(targetUrl, r, `Kolom H - ${r.docSanggahan}`);
+                              onPlayVideo(targetUrl, r, `Doc Sanggahan: ${r.docSanggahan}`);
                             } else {
                               window.open(targetUrl, '_blank');
                             }
