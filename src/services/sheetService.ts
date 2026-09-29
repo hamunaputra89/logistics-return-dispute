@@ -281,6 +281,78 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
 }
 
 /**
+ * Fetch live Google Sheets rows via JSONP (avoids CORS restrictions on static hosts like GitHub Pages)
+ */
+function fetchSheetViaJsonp(): Promise<string[][] | null> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve) => {
+    const callbackName = 'gvizCallback_' + Math.random().toString(36).substring(2, 9);
+    const script = document.createElement('script');
+    let timedOut = false;
+
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      cleanup();
+      resolve(null);
+    }, 9000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      try {
+        delete (window as any)[callbackName];
+      } catch (_) {
+        (window as any)[callbackName] = undefined;
+      }
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    }
+
+    (window as any)[callbackName] = (data: any) => {
+      if (timedOut) return;
+      cleanup();
+      try {
+        if (!data || !data.table || !data.table.rows) {
+          return resolve(null);
+        }
+        const rawRows: string[][] = [];
+        // Header row
+        const headerRow = (data.table.cols || []).map((col: any) => col?.label || '');
+        rawRows.push(headerRow);
+
+        // Data rows
+        for (const r of data.table.rows) {
+          if (!r || !r.c) continue;
+          const cells: string[] = r.c.map((cell: any) => {
+            if (!cell) return '';
+            if (cell.f !== undefined && cell.f !== null) return String(cell.f);
+            if (cell.v !== undefined && cell.v !== null) return String(cell.v);
+            return '';
+          });
+          rawRows.push(cells);
+        }
+        resolve(rawRows);
+      } catch (err) {
+        console.warn('Error parsing JSONP Google Sheets table:', err);
+        resolve(null);
+      }
+    };
+
+    script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${callbackName}&gid=${SHEET_GID}&_t=${Date.now()}`;
+    script.onerror = () => {
+      if (!timedOut) {
+        cleanup();
+        resolve(null);
+      }
+    };
+    document.body.appendChild(script);
+  });
+}
+
+/**
  * Fetch records from the live Google Sheet
  */
 export async function fetchSheetData(accessToken?: string | null): Promise<{
@@ -352,7 +424,24 @@ export async function fetchSheetData(accessToken?: string | null): Promise<{
     console.warn('/api/sheet-data proxy failed or unavailable, checking alternative sources...', err);
   }
 
-  // 3. Try direct Google Docs export (may work in some environments)
+  // 3. Try live Google Sheets JSONP (works directly in the browser on GitHub Pages without CORS)
+  try {
+    const jsonpRows = await fetchSheetViaJsonp();
+    if (jsonpRows && jsonpRows.length > 1) {
+      const records = transformRows(jsonpRows);
+      if (records.length > 0) {
+        return {
+          records,
+          sheetTitle: cachedSheetTitle || 'SEMARANG - SANGGAHAN',
+          source: 'csv',
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Google Sheets JSONP fetch error:', err);
+  }
+
+  // 4. Try direct Google Docs export (may work in some environments)
   try {
     const timestamp = Date.now();
     const res = await fetch(`${EXPORT_CSV_URL}&_t=${timestamp}`, {
@@ -375,7 +464,7 @@ export async function fetchSheetData(accessToken?: string | null): Promise<{
     console.warn('Direct Google Sheet fetch failed (likely browser CORS):', err);
   }
 
-  // 4. Resilient Fallback: use pre-loaded real spreadsheet dataset (1,165+ records)
+  // 5. Resilient Fallback: use pre-loaded real spreadsheet dataset (1,165+ records)
   // This guarantees zero "Failed to fetch" errors and instant load
   const rawRows = parseCSV(FALLBACK_CSV);
   const records = transformRows(rawRows);
