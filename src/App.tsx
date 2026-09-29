@@ -215,7 +215,18 @@ export default function App() {
       }
     } catch (err: any) {
       console.error('Google Sign In failed:', err);
-      addToast('error', 'Login Gagal', err.message || 'Tidak dapat login dengan Google.');
+      if (err.code === 'auth/unauthorized-domain' || err.message?.includes('unauthorized-domain')) {
+        const currentDomain = window.location.hostname;
+        addToast(
+          'error',
+          'Domain Belum Diizinkan di Firebase',
+          `Domain "${currentDomain}" belum didaftarkan di Firebase Authentication > Settings > Authorized Domains. Tambahkan domain ini agar login Google dapat digunakan di GitHub Pages.`
+        );
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        addToast('info', 'Login Dibatalkan', 'Jendela login Google ditutup sebelum proses selesai.');
+      } else {
+        addToast('error', 'Login Gagal', err.message || 'Tidak dapat login dengan Google.');
+      }
     } finally {
       setIsLoggingIn(false);
     }
