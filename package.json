@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predeploy": "bun run build",
+    "deploy": "gh-pages -d dist",
     "dev": "tsx server.ts",
     "build": "vite build",
     "start": "tsx server.ts",
