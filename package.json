@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predeploy": "npm run build",
+    "sync:sheet": "node scripts/sync-sheet.js",
+    "predeploy": "npm run sync:sheet && npm run build",
     "deploy": "gh-pages -d dist",
     "dev": "tsx server.ts",
     "build": "vite build",

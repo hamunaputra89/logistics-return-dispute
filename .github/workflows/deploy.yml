@@ -5,6 +5,9 @@ on:
     branches:
       - main
       - master
+  schedule:
+    # Re-sync and deploy latest Google Sheets data every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +36,9 @@ jobs:
 
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
+
+      - name: Fetch Latest Spreadsheet Data
+        run: npm run sync:sheet
 
       - name: Build Production Bundle
         run: npm run build

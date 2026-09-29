@@ -341,7 +341,7 @@ function fetchSheetViaJsonp(): Promise<string[][] | null> {
       }
     };
 
-    script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${callbackName}&gid=${SHEET_GID}&_t=${Date.now()}`;
+    script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${callbackName}&gid=${SHEET_GID}&headers=1&tq=${encodeURIComponent('select *')}&_t=${Date.now()}`;
     script.onerror = () => {
       if (!timedOut) {
         cleanup();
@@ -360,7 +360,34 @@ export async function fetchSheetData(accessToken?: string | null): Promise<{
   sheetTitle: string;
   source: 'api' | 'csv' | 'cached';
 }> {
-  // 1. If we have an OAuth token, try Google Sheets API v4
+  const isStaticHosting =
+    typeof window !== 'undefined' &&
+    (window.location.hostname.includes('github.io') ||
+      window.location.hostname.includes('pages.dev') ||
+      window.location.hostname.includes('netlify.app') ||
+      window.location.hostname.includes('vercel.app'));
+
+  // 1. If on static hosting (like GitHub Pages) without backend Express server,
+  // directly fetch live Google Sheets data via JSONP (bypasses browser CORS completely)
+  if (isStaticHosting && !accessToken) {
+    try {
+      const jsonpRows = await fetchSheetViaJsonp();
+      if (jsonpRows && jsonpRows.length > 1) {
+        const records = transformRows(jsonpRows);
+        if (records.length > 0) {
+          return {
+            records,
+            sheetTitle: cachedSheetTitle || 'SEMARANG - SANGGAHAN',
+            source: 'api',
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Google Sheets JSONP live fetch error on static host:', err);
+    }
+  }
+
+  // 2. If we have an OAuth token, try Google Sheets API v4
   if (accessToken) {
     try {
       const metaRes = await fetch(
@@ -383,7 +410,7 @@ export async function fetchSheetData(accessToken?: string | null): Promise<{
 
         const title = cachedSheetTitle || 'Sheet1';
         const valuesRes = await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(title)}!A1:R2000`,
+          `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(title)}!A1:R2500`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
@@ -403,28 +430,30 @@ export async function fetchSheetData(accessToken?: string | null): Promise<{
     }
   }
 
-  // 2. Try fetching from server proxy /api/sheet-data (avoids browser CORS)
-  try {
-    const res = await fetch(`/api/sheet-data?_t=${Date.now()}`);
-    if (res.ok) {
-      const csvText = await res.text();
-      if (csvText && csvText.length > 100) {
-        const rawRows = parseCSV(csvText);
-        const records = transformRows(rawRows);
-        if (records.length > 0) {
-          return {
-            records,
-            sheetTitle: cachedSheetTitle || 'SEMARANG - SANGGAHAN',
-            source: 'csv',
-          };
+  // 3. Try fetching from server proxy /api/sheet-data (works when running node server.ts)
+  if (!isStaticHosting) {
+    try {
+      const res = await fetch(`/api/sheet-data?_t=${Date.now()}`);
+      if (res.ok) {
+        const csvText = await res.text();
+        if (csvText && csvText.length > 100) {
+          const rawRows = parseCSV(csvText);
+          const records = transformRows(rawRows);
+          if (records.length > 0) {
+            return {
+              records,
+              sheetTitle: cachedSheetTitle || 'SEMARANG - SANGGAHAN',
+              source: 'csv',
+            };
+          }
         }
       }
+    } catch (err) {
+      console.warn('/api/sheet-data proxy failed or unavailable, checking alternative sources...', err);
     }
-  } catch (err) {
-    console.warn('/api/sheet-data proxy failed or unavailable, checking alternative sources...', err);
   }
 
-  // 3. Try live Google Sheets JSONP (works directly in the browser on GitHub Pages without CORS)
+  // 4. Try live Google Sheets JSONP (general fallback for any environment)
   try {
     const jsonpRows = await fetchSheetViaJsonp();
     if (jsonpRows && jsonpRows.length > 1) {
@@ -433,7 +462,7 @@ export async function fetchSheetData(accessToken?: string | null): Promise<{
         return {
           records,
           sheetTitle: cachedSheetTitle || 'SEMARANG - SANGGAHAN',
-          source: 'csv',
+          source: 'api',
         };
       }
     }
