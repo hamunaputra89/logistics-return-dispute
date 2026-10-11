@@ -56,14 +56,27 @@ export function parseCSV(text: string): string[][] {
 
 /**
  * Determine Courier from waybill prefix
+ * - TG: JNE
+ * - JX / JY: J&T Express
+ * - SPX: Shopee Express
+ * - JP: J&T Cargo
  */
 export function detectCourier(resi: string, resiRetur: string): ReturnRecord['courier'] {
-  const code = (resi || resiRetur || '').toUpperCase();
-  if (code.startsWith('TG')) return 'JNE';
-  if (code.startsWith('JX')) return 'J&T';
-  if (code.startsWith('SPX')) return 'Shopee Express';
-  if (code.startsWith('JP')) return 'J&T Cargo';
-  if (code) return 'Other';
+  const primary = (resi || '').toUpperCase().trim();
+  const secondary = (resiRetur || '').toUpperCase().trim();
+
+  const checkPrefix = (c: string): ReturnRecord['courier'] | null => {
+    if (c.startsWith('TG')) return 'JNE';
+    if (c.startsWith('JX') || c.startsWith('JY')) return 'J&T';
+    if (c.startsWith('SPX')) return 'Shopee Express';
+    if (c.startsWith('JP')) return 'J&T Cargo';
+    return null;
+  };
+
+  const detected = checkPrefix(primary) || checkPrefix(secondary);
+  if (detected) return detected;
+
+  if (primary || secondary) return 'Other';
   return 'Unknown';
 }
 
@@ -165,45 +178,87 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
   if (rawRows.length <= 1) return [];
 
   // Index 0 is header row
+  const headerRow = rawRows[0] || [];
+  const findCol = (patterns: RegExp[], defaultIndex: number): number => {
+    for (const pat of patterns) {
+      const idx = headerRow.findIndex((h) => pat.test(String(h || '').trim().toLowerCase()));
+      if (idx !== -1) return idx;
+    }
+    return defaultIndex;
+  };
+
+  const hasMarketplaceCol = headerRow.some((h) => /marketplace|order_id/i.test(String(h || '')));
+
+  const colIdx = {
+    tanggal: findCol([/^tanggal/i, /^tgl/i], 0),
+    orderId: findCol([/marketplace.*order.*id/i, /order.*id/i], hasMarketplaceCol ? 1 : -1),
+    resiRetur: findCol([/resi.*retur/i, /^retur$/i], hasMarketplaceCol ? 2 : 1),
+    dn: findCol([/^dn$/i, /delivery.*note/i], hasMarketplaceCol ? 3 : 2),
+    resiOriginal: findCol([/resi.*original/i, /^resi$/i], hasMarketplaceCol ? 4 : 3),
+    sku: findCol([/sku.*number/i, /^sku$/i], hasMarketplaceCol ? 5 : 4),
+    imei: findCol([/^imei$/i, /^sn$/i, /serial/i], hasMarketplaceCol ? 6 : 5),
+    sloc: findCol([/^sloc$/i, /lokasi/i], hasMarketplaceCol ? 7 : 6),
+    receivedKetUnit: findCol([/received.*ket.*unit/i, /ket.*unit/i, /received/i], hasMarketplaceCol ? 8 : -1),
+    docSanggahan: findCol([/doc.*sanggahan/i, /sanggahan/i], hasMarketplaceCol ? 9 : 7),
+    updateCase: findCol([/update.*case/i, /^case$/i], hasMarketplaceCol ? 10 : 8),
+    keterangan: findCol([/^keterangan$/i], hasMarketplaceCol ? -1 : 9),
+    status: findCol([/^status$/i], hasMarketplaceCol ? 11 : 13),
+    deletedLinkSanggah: findCol([/deleted.*link/i], hasMarketplaceCol ? 12 : -1),
+    namaPacker: findCol([/nama.*packer/i, /packer/i], hasMarketplaceCol ? 13 : 14),
+    tglJamPacking: findCol([/jam.*packing/i, /tgl.*packing/i], hasMarketplaceCol ? 14 : 16),
+    catatan: findCol([/catatan/i, /^note/i], hasMarketplaceCol ? 15 : 17),
+    docHandover: findCol([/handover|doc.*handover/i], hasMarketplaceCol ? -1 : 10),
+    noHo: findCol([/no.*ho/i, /ho.*#/i], hasMarketplaceCol ? -1 : 11),
+    notedApaKee: findCol([/noted.*apa.*kee/i, /note.*req/i], hasMarketplaceCol ? -1 : 12),
+    statusPrint: findCol([/status.*print/i], hasMarketplaceCol ? -1 : 15),
+  };
+
   const dataRows = rawRows.slice(1);
   const records: ReturnRecord[] = [];
 
   dataRows.forEach((row, idx) => {
-    // Expected 18 columns
-    const tanggal = row[0] || '';
-    const resiRetur = row[1] || '';
-    const dn = row[2] || '';
-    const resiOriginal = row[3] || '';
-    const sku = row[4] || '';
-    const imei = row[5] || '';
-    const sloc = row[6] || '';
-    const rawDocSanggahan = (row[7] || '').trim();
-    // jika kolom H kosong ganti menjadi On Proses
+    const getVal = (i: number) => (i >= 0 && i < row.length ? String(row[i] || '').trim() : '');
+
+    const tanggal = getVal(colIdx.tanggal);
+    const orderId = getVal(colIdx.orderId);
+    const resiRetur = getVal(colIdx.resiRetur);
+    const dn = getVal(colIdx.dn);
+    const resiOriginal = getVal(colIdx.resiOriginal);
+    const sku = getVal(colIdx.sku);
+    const imei = getVal(colIdx.imei);
+    const sloc = getVal(colIdx.sloc);
+    const receivedKetUnit = getVal(colIdx.receivedKetUnit);
+    const rawDocSanggahan = getVal(colIdx.docSanggahan);
     const docSanggahan = (!rawDocSanggahan || rawDocSanggahan.toLowerCase() === 'tidak ditemukan')
       ? 'On Proses'
       : rawDocSanggahan;
-    const updateCase = row[8] || '';
-    const keterangan = row[9] || '';
-    const docHandover = row[10] || '';
-    const noHo = row[11] || '';
-    const notedApaKee = row[12] || '';
-    const status = row[13] || '';
-    const namaPacker = row[14] || '';
-    const statusPrint = row[15] || '';
-    const tglJamPacking = row[16] || '';
-    const catatan = row[17] || '';
+    const updateCase = getVal(colIdx.updateCase);
+    const keterangan = getVal(colIdx.keterangan);
+    const docHandover = getVal(colIdx.docHandover);
+    const noHo = getVal(colIdx.noHo);
+    const notedApaKee = getVal(colIdx.notedApaKee);
+    const status = getVal(colIdx.status);
+    const deletedLinkSanggah = getVal(colIdx.deletedLinkSanggah);
+    const namaPacker = getVal(colIdx.namaPacker);
+    const statusPrint = getVal(colIdx.statusPrint);
+    const tglJamPacking = getVal(colIdx.tglJamPacking);
+    const catatan = getVal(colIdx.catatan);
 
     // Ignore completely empty or repetitive header-like dummy rows
-    if (!resiRetur && !resiOriginal && !updateCase && !dn && !sku) return;
+    if (!resiRetur && !resiOriginal && !orderId && !updateCase && !receivedKetUnit && !dn && !sku) return;
 
     const courier = detectCourier(resiOriginal, resiRetur);
-    const categoryType = categorizeCase(updateCase, keterangan);
+    const primaryCase = receivedKetUnit || updateCase || keterangan;
+    const categoryType = categorizeCase(primaryCase, updateCase || keterangan);
 
-    const isDriveLink = notedApaKee.includes('drive.google.com') || notedApaKee.startsWith('http');
+    const isDriveLink =
+      notedApaKee.includes('drive.google.com') ||
+      notedApaKee.startsWith('http') ||
+      deletedLinkSanggah.includes('drive.google.com');
     const isCctvFile = notedApaKee.toLowerCase().includes('.mp4') || notedApaKee.startsWith('D0');
-    const hasEvidence = isDriveLink || isCctvFile || notedApaKee.length > 5;
+    const hasEvidence = isDriveLink || isCctvFile || notedApaKee.length > 5 || deletedLinkSanggah.length > 5;
 
-    // Detect if Kolom H (Doc Sanggahan) contains a URL or Google Video link
+    // Detect if Kolom Doc Sanggahan contains a URL or Google Video link
     const cleanDocH = docSanggahan.trim();
     const isDocSanggahanLink =
       cleanDocH !== 'On Proses' &&
@@ -218,7 +273,7 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
         cleanDocH.includes('goo.gl') ||
         cleanDocH.includes('/file/d/'));
 
-    // Detect if Kolom H is a video filename (e.g. TG3562759676.mp4 or unboxing...)
+    // Detect if Kolom Doc Sanggahan is a video filename (e.g. TG3562759676.mp4 or unboxing...)
     const isDocSanggahanVideoFile =
       cleanDocH !== 'On Proses' &&
       cleanDocH !== 'Tidak ditemukan' &&
@@ -233,26 +288,28 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
         : `https://${cleanDocH}`
       : isDocSanggahanVideoFile
       ? isDriveLink
-        ? notedApaKee.trim()
+        ? (notedApaKee.trim() || deletedLinkSanggah.trim())
         : `https://drive.google.com/drive/search?q=${encodeURIComponent(cleanDocH)}`
       : undefined;
 
     const docSanggahanEmbedUrl = isDocSanggahanLink && docSanggahanUrl
       ? getGoogleVideoEmbedUrl(docSanggahanUrl) || undefined
       : isDocSanggahanVideoFile && isDriveLink
-      ? getGoogleVideoEmbedUrl(notedApaKee.trim()) || undefined
+      ? getGoogleVideoEmbedUrl(notedApaKee.trim() || deletedLinkSanggah.trim()) || undefined
       : undefined;
 
     records.push({
-      id: `row-${idx + 2}-${resiOriginal || resiRetur || idx}`,
+      id: `row-${idx + 2}-${resiOriginal || resiRetur || orderId || idx}`,
       rowIndex: idx + 2,
       tanggal,
+      orderId,
       resiRetur,
       dn,
       resiOriginal,
       sku,
       imei,
       sloc,
+      receivedKetUnit,
       docSanggahan,
       updateCase,
       keterangan,
@@ -260,6 +317,7 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
       noHo,
       notedApaKee,
       status: status || 'pending',
+      deletedLinkSanggah,
       namaPacker,
       statusPrint,
       tglJamPacking,
@@ -267,7 +325,7 @@ export function transformRows(rawRows: string[][]): ReturnRecord[] {
       courier,
       categoryType,
       hasEvidence,
-      evidenceUrl: isDriveLink ? notedApaKee.trim() : undefined,
+      evidenceUrl: isDriveLink ? (notedApaKee.trim() || deletedLinkSanggah.trim()) : undefined,
       isDriveLink,
       isCctvFile,
       isDocSanggahanLink,
@@ -657,8 +715,9 @@ export function computeSheetStats(records: ReturnRecord[]): SheetStats {
     }
 
     // Cases
-    if (r.updateCase && r.updateCase !== 'Tidak ditemukan' && r.updateCase.length > 1) {
-      const cleanCase = r.updateCase
+    const rawCaseText = r.receivedKetUnit || r.updateCase;
+    if (rawCaseText && rawCaseText !== 'Tidak ditemukan' && rawCaseText.length > 1) {
+      const cleanCase = rawCaseText
         .replace(/^done\s+submit\.\s*/i, '')
         .replace(/^done\s+satu\.\s*/i, '')
         .replace(/^done\s+daily\.\s*/i, '')

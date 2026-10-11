@@ -58,12 +58,14 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
 
   const [form, setForm] = useState({
     tanggal: dateStr,
+    orderId: '',
     resiRetur: '',
     dn: '',
     resiOriginal: '',
     sku: '',
     imei: '',
     sloc: '1655',
+    receivedKetUnit: '',
     docSanggahan: 'On Proses',
     updateCase: '',
     keterangan: '',
@@ -80,17 +82,6 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
-
-  const handleGenerateHandover = () => {
-    const ymd = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(
-      today.getDate()
-    ).padStart(2, '0')}`;
-    const rand = Math.random().toString(36).substring(2, 7).toUpperCase();
-    setForm((prev) => ({
-      ...prev,
-      docHandover: `HO-${ymd}-${rand}`,
-    }));
-  };
 
   const handleApplyPresetCase = (preset: string) => {
     setForm((prev) => ({
@@ -113,12 +104,14 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
     try {
       await onSubmit({
         tanggal: form.tanggal || dateStr,
+        orderId: form.orderId.trim(),
         resiRetur: form.resiRetur.trim(),
         dn: form.dn.trim(),
         resiOriginal: form.resiOriginal.trim(),
         sku: form.sku.trim(),
         imei: form.imei.trim(),
         sloc: form.sloc || '1655',
+        receivedKetUnit: form.receivedKetUnit.trim() || form.updateCase.trim(),
         docSanggahan: form.docSanggahan.trim() || 'On Proses',
         updateCase: form.updateCase.trim(),
         keterangan: form.keterangan.trim(),
@@ -371,12 +364,12 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
             </div>
           </div>
 
-          {/* Section 4: Handover Serah Terima & Bukti CCTV/Drive */}
+          {/* Section 4: Sanggahan & Bukti CCTV/Drive */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-              4. Dokumen Sanggahan, Serah Terima & Bukti CCTV
+              4. Dokumen Sanggahan & Bukti CCTV
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-slate-600 font-medium mb-1">
                   Doc Sanggahan
@@ -386,39 +379,6 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
                   placeholder="On Proses (default)"
                   value={form.docSanggahan}
                   onChange={(e) => setForm({ ...form, docSanggahan: e.target.value })}
-                  className="w-full font-mono text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-slate-600 font-medium">Doc Handover</label>
-                  <button
-                    type="button"
-                    onClick={handleGenerateHandover}
-                    className="text-[10px] font-bold text-blue-600 hover:underline"
-                  >
-                    Auto Generate
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Contoh: HO-20260926-XXXX"
-                  value={form.docHandover}
-                  onChange={(e) => setForm({ ...form, docHandover: e.target.value })}
-                  className="w-full font-mono text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-medium mb-1">
-                  NO HO (Nomor Batch)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: 108 atau 156"
-                  value={form.noHo}
-                  onChange={(e) => setForm({ ...form, noHo: e.target.value })}
                   className="w-full font-mono text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500"
                 />
               </div>
@@ -443,7 +403,7 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
             <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
               5. Petugas Packing & Status
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-slate-600 font-medium mb-1">
                   Tanggal Pencatatan
@@ -488,20 +448,6 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
                   <option value="submit email">submit email</option>
                   <option value="ancol">ancol</option>
                   <option value="pending">pending</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-medium mb-1">
-                  Status Print
-                </label>
-                <select
-                  value={form.statusPrint}
-                  onChange={(e) => setForm({ ...form, statusPrint: e.target.value })}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-blue-500"
-                >
-                  <option value="Success">Success</option>
-                  <option value="Pending">Pending</option>
                 </select>
               </div>
             </div>

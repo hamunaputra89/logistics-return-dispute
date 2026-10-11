@@ -25,6 +25,7 @@ import {
   fetchSheetData,
   appendSheetRecord,
   computeSheetStats,
+  detectCourier,
   SPREADSHEET_URL,
   getGoogleVideoEmbedUrl,
 } from './services/sheetService';
@@ -294,12 +295,14 @@ export default function App() {
         id: `row-new-${Date.now()}`,
         rowIndex: records.length + 2,
         tanggal: data.tanggal,
+        orderId: (data as any).orderId || '',
         resiRetur: data.resiRetur,
         dn: data.dn,
         resiOriginal: data.resiOriginal,
         sku: data.sku,
         imei: data.imei,
         sloc: data.sloc,
+        receivedKetUnit: (data as any).receivedKetUnit || data.updateCase || '',
         docSanggahan: data.docSanggahan?.trim() ? data.docSanggahan.trim() : 'On Proses',
         updateCase: data.updateCase,
         keterangan: data.keterangan,
@@ -311,13 +314,7 @@ export default function App() {
         statusPrint: data.statusPrint,
         tglJamPacking: data.tglJamPacking,
         catatan: data.catatan,
-        courier: (data.resiOriginal.startsWith('TG')
-          ? 'JNE'
-          : data.resiOriginal.startsWith('JX')
-          ? 'J&T'
-          : data.resiOriginal.startsWith('SPX')
-          ? 'Shopee Express'
-          : 'Other') as any,
+        courier: detectCourier(data.resiOriginal, data.resiRetur),
         categoryType: data.updateCase.toLowerCase().includes('tidak sesuai')
           ? 'fraud'
           : data.updateCase.toLowerCase().includes('rusak') ||

@@ -23,7 +23,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ stats, onFilterCategory }) =
   const evidencePercent = stats.total > 0 ? ((stats.hasEvidenceCount / stats.total) * 100).toFixed(1) : '0';
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
       {/* 1. Total Volume */}
       <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
@@ -136,30 +136,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ stats, onFilterCategory }) =
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500 rounded-b-2xl" />
       </div>
 
-      {/* 5. Handover / Serah Terima */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden group">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Dokumen Serah Terima
-          </span>
-          <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
-            <FileCheck2 className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-indigo-700 tracking-tight">
-            {stats.handoverDocCount.toLocaleString()}
-          </span>
-          <span className="text-[11px] font-medium text-slate-500">HO Docs</span>
-        </div>
-        <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500">
-          <span className="inline-block w-2 h-2 rounded-full bg-indigo-500" />
-          <span>Batch NO HO Terdata</span>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-500 rounded-b-2xl" />
-      </div>
-
-      {/* 6. Bukti CCTV / Drive Links */}
+      {/* 5. Bukti CCTV / Drive Links */}
       <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">

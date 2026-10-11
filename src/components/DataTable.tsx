@@ -80,14 +80,14 @@ export const DataTable: React.FC<DataTableProps> = ({
         const match =
           r.resiOriginal.toLowerCase().includes(q) ||
           r.resiRetur.toLowerCase().includes(q) ||
+          (r.orderId && r.orderId.toLowerCase().includes(q)) ||
           r.dn.toLowerCase().includes(q) ||
           r.imei.toLowerCase().includes(q) ||
           r.sku.toLowerCase().includes(q) ||
+          (r.receivedKetUnit && r.receivedKetUnit.toLowerCase().includes(q)) ||
           r.updateCase.toLowerCase().includes(q) ||
           r.namaPacker.toLowerCase().includes(q) ||
           r.docSanggahan.toLowerCase().includes(q) ||
-          r.docHandover.toLowerCase().includes(q) ||
-          r.noHo.toLowerCase().includes(q) ||
           r.keterangan.toLowerCase().includes(q);
         if (!match) return false;
       }
@@ -166,42 +166,36 @@ export const DataTable: React.FC<DataTableProps> = ({
   const handleExportCSV = () => {
     const headers = [
       'Tanggal',
+      'Marketplace Order ID',
       'Resi Retur',
       'DN',
       'Resi Original',
       'SKU',
       'IMEI',
       'Sloc',
+      'Received / KET UNIT',
       'Doc Sanggahan',
       'Update Case',
-      'KETERANGAN',
-      'Doc Handover',
-      'NO HO',
-      'Noted apa kee',
       'Status',
       'Nama Packer',
-      'Status Print',
       'Tgl & Jam Packing',
       'catatan',
     ];
 
     const rows = sortedRecords.map((r) => [
       `"${r.tanggal}"`,
+      `"${r.orderId || ''}"`,
       `"${r.resiRetur}"`,
       `"${r.dn}"`,
       `"${r.resiOriginal}"`,
       `"${r.sku}"`,
       `"${r.imei}"`,
       `"${r.sloc}"`,
+      `"${(r.receivedKetUnit || '').replace(/"/g, '""')}"`,
       `"${r.docSanggahan}"`,
       `"${r.updateCase.replace(/"/g, '""')}"`,
-      `"${r.keterangan.replace(/"/g, '""')}"`,
-      `"${r.docHandover}"`,
-      `"${r.noHo}"`,
-      `"${r.notedApaKee.replace(/"/g, '""')}"`,
       `"${r.status}"`,
       `"${r.namaPacker}"`,
-      `"${r.statusPrint}"`,
       `"${r.tglJamPacking}"`,
       `"${r.catatan.replace(/"/g, '""')}"`,
     ]);
@@ -309,7 +303,7 @@ export const DataTable: React.FC<DataTableProps> = ({
           >
             <option value="all">Semua Kurir</option>
             <option value="JNE">JNE (TG)</option>
-            <option value="J&T">J&T Express (JX)</option>
+            <option value="J&T">J&T Express (JX / JY)</option>
             <option value="Shopee Express">Shopee Express (SPX)</option>
             <option value="Other">Lainnya / Cargo</option>
           </select>
@@ -355,7 +349,7 @@ export const DataTable: React.FC<DataTableProps> = ({
 
       {/* Main Table */}
       <div className="overflow-x-auto min-h-[380px]">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full min-w-[1550px] text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-100/75 text-slate-600 font-semibold uppercase tracking-wider text-[11px] select-none">
               <th
@@ -363,7 +357,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                   setSortField('rowIndex');
                   setSortAsc(!sortAsc);
                 }}
-                className="py-3 px-3.5 cursor-pointer hover:text-slate-900 w-12"
+                className="py-3 px-3.5 cursor-pointer hover:text-slate-900 w-12 text-center"
               >
                 No
               </th>
@@ -372,42 +366,46 @@ export const DataTable: React.FC<DataTableProps> = ({
                   setSortField('tanggal');
                   setSortAsc(!sortAsc);
                 }}
-                className="py-3 px-3.5 cursor-pointer hover:text-slate-900"
+                className="py-3 px-3.5 cursor-pointer hover:text-slate-900 min-w-[95px]"
               >
                 Tanggal
+              </th>
+              <th className="py-3 px-3.5 min-w-[155px]">
+                Marketplace Order ID
               </th>
               <th
                 onClick={() => {
                   setSortField('courier');
                   setSortAsc(!sortAsc);
                 }}
-                className="py-3 px-3.5 cursor-pointer hover:text-slate-900"
+                className="py-3 px-3.5 cursor-pointer hover:text-slate-900 min-w-[165px]"
               >
                 Resi Original & Kurir
               </th>
-              <th className="py-3 px-3.5">Resi Retur & DN</th>
-              <th className="py-3 px-3.5">SKU & IMEI</th>
-              <th className="py-3 px-3.5">Kasus (Update Case)</th>
-              <th className="py-3 px-3.5 text-blue-700 bg-blue-50/50">Doc Sanggahan</th>
-              <th className="py-3 px-3.5">Sloc</th>
-              <th className="py-3 px-3.5">Handover & CCTV</th>
-              <th className="py-3 px-3.5">Packer</th>
+              <th className="py-3 px-3.5 min-w-[145px]">Resi Retur</th>
+              <th className="py-3 px-3.5 min-w-[110px]">No. DN</th>
+              <th className="py-3 px-3.5 min-w-[145px]">SKU Produk</th>
+              <th className="py-3 px-3.5 min-w-[160px]">IMEI / SN</th>
+              <th className="py-3 px-3.5 min-w-[80px]">Sloc</th>
+              <th className="py-3 px-3.5 min-w-[230px]">Keluhan / Kondisi (Received)</th>
+              <th className="py-3 px-3.5 text-blue-700 bg-blue-50/50 min-w-[160px]">Doc Sanggahan</th>
+              <th className="py-3 px-3.5 min-w-[160px]">Packer & Jam Packing</th>
               <th
                 onClick={() => {
                   setSortField('status');
                   setSortAsc(!sortAsc);
                 }}
-                className="py-3 px-3.5 cursor-pointer hover:text-slate-900"
+                className="py-3 px-3.5 cursor-pointer hover:text-slate-900 min-w-[95px]"
               >
                 Status
               </th>
-              <th className="py-3 px-3.5 text-right">Aksi</th>
+              <th className="py-3 px-3.5 text-right min-w-[75px]">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/70">
             {pagedRecords.length === 0 ? (
               <tr>
-                <td colSpan={12} className="py-12 text-center text-slate-500">
+                <td colSpan={14} className="py-12 text-center text-slate-500">
                   <div className="max-w-xs mx-auto space-y-2">
                     <HelpCircle className="w-8 h-8 text-slate-400 mx-auto" />
                     <p className="font-semibold text-slate-700">Tidak ada data ditemukan</p>
@@ -439,7 +437,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                     className="hover:bg-blue-50/40 transition-colors cursor-pointer group"
                   >
                     {/* Row Index */}
-                    <td className="py-3 px-3.5 font-mono text-slate-400 font-semibold text-[11px]">
+                    <td className="py-3 px-3.5 font-mono text-slate-400 font-semibold text-[11px] text-center">
                       {r.rowIndex}
                     </td>
 
@@ -448,13 +446,37 @@ export const DataTable: React.FC<DataTableProps> = ({
                       {r.tanggal || '-'}
                     </td>
 
+                    {/* Marketplace Order ID */}
+                    <td className="py-3 px-3.5 whitespace-nowrap">
+                      {r.orderId && r.orderId !== 'Tidak ditemukan' ? (
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            {r.orderId}
+                          </span>
+                          <button
+                            onClick={(e) => handleCopy(r.orderId, e)}
+                            className="text-slate-300 hover:text-slate-600 p-0.5"
+                            title="Salin Order ID"
+                          >
+                            {copiedText === r.orderId ? (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 font-mono text-[11px]">-</span>
+                      )}
+                    </td>
+
                     {/* Resi Original & Courier */}
                     <td className="py-3 px-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono font-semibold text-slate-900">
                           {r.resiOriginal || '-'}
                         </span>
-                        {r.resiOriginal && (
+                        {r.resiOriginal && r.resiOriginal !== 'Tidak ditemukan' && (
                           <button
                             onClick={(e) => handleCopy(r.resiOriginal, e)}
                             className="text-slate-300 hover:text-slate-600 p-0.5"
@@ -485,28 +507,96 @@ export const DataTable: React.FC<DataTableProps> = ({
                       </div>
                     </td>
 
-                    {/* Resi Retur & DN */}
+                    {/* Resi Retur */}
                     <td className="py-3 px-3.5 whitespace-nowrap">
-                      <div className="font-mono text-slate-800 font-medium">
-                        {r.resiRetur || '-'}
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-400">
-                        DN: {r.dn || '-'}
-                      </div>
+                      {r.resiRetur && r.resiRetur !== 'Tidak ditemukan' ? (
+                        <div className="flex items-center gap-1 font-mono text-slate-800 font-medium">
+                          <span>{r.resiRetur}</span>
+                          <button
+                            onClick={(e) => handleCopy(r.resiRetur, e)}
+                            className="text-slate-300 hover:text-slate-600 p-0.5"
+                            title="Salin Resi Retur"
+                          >
+                            {copiedText === r.resiRetur ? (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 font-mono text-[11px]">-</span>
+                      )}
                     </td>
 
-                    {/* SKU & IMEI */}
-                    <td className="py-3 px-3.5 max-w-[150px]">
+                    {/* No. DN */}
+                    <td className="py-3 px-3.5 whitespace-nowrap font-mono text-slate-700 font-medium">
+                      {r.dn && r.dn !== 'Tidak ditemukan' ? (
+                        <div className="flex items-center gap-1">
+                          <span>{r.dn}</span>
+                          <button
+                            onClick={(e) => handleCopy(r.dn, e)}
+                            className="text-slate-300 hover:text-slate-600 p-0.5"
+                            title="Salin DN"
+                          >
+                            {copiedText === r.dn ? (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </td>
+
+                    {/* SKU Produk */}
+                    <td className="py-3 px-3.5 max-w-[160px]">
                       <div className="font-semibold text-slate-800 truncate" title={r.sku}>
-                        {r.sku || '-'}
-                      </div>
-                      <div className="font-mono text-[10px] text-slate-500 truncate" title={r.imei}>
-                        IMEI: {r.imei || '-'}
+                        {r.sku && r.sku !== 'Tidak ditemukan' ? r.sku : '-'}
                       </div>
                     </td>
 
-                    {/* Update Case (Kasus) */}
-                    <td className="py-3 px-3.5 max-w-[200px]">
+                    {/* IMEI / SN */}
+                    <td className="py-3 px-3.5 whitespace-nowrap font-mono text-[11px] text-slate-700">
+                      {r.imei && r.imei !== 'NO SN' && r.imei !== 'Tidak ditemukan' ? (
+                        <div className="flex items-center gap-1">
+                          <span>{r.imei}</span>
+                          <button
+                            onClick={(e) => handleCopy(r.imei, e)}
+                            className="text-slate-300 hover:text-slate-600 p-0.5"
+                            title="Salin IMEI"
+                          >
+                            {copiedText === r.imei ? (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">{r.imei || '-'}</span>
+                      )}
+                    </td>
+
+                    {/* Sloc */}
+                    <td className="py-3 px-3.5 whitespace-nowrap">
+                      <span
+                        className={`font-mono text-xs font-semibold px-2 py-0.5 rounded-md ${
+                          r.sloc === '1655'
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                            : r.sloc === '1653'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {r.sloc || '-'}
+                      </span>
+                    </td>
+
+                    {/* Keluhan / Kondisi Unit (Received) */}
+                    <td className="py-3 px-3.5 max-w-[240px]">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {isFraud && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-700 shrink-0">
@@ -526,15 +616,15 @@ export const DataTable: React.FC<DataTableProps> = ({
                           </span>
                         )}
                         <span
-                          className="font-medium text-slate-800 truncate max-w-[170px]"
-                          title={r.updateCase || r.keterangan}
+                          className="font-medium text-slate-800 truncate max-w-[200px]"
+                          title={r.receivedKetUnit || r.updateCase || r.keterangan || '-'}
                         >
-                          {r.updateCase || r.keterangan || '-'}
+                          {r.receivedKetUnit || r.updateCase || r.keterangan || '-'}
                         </span>
                       </div>
                     </td>
 
-                    {/* Dedicated Column: Doc Sanggahan (Kolom H) */}
+                    {/* Doc Sanggahan */}
                     <td className="py-3 px-3.5 whitespace-nowrap bg-blue-50/20">
                       {r.docSanggahan === 'On Proses' ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
@@ -579,13 +669,13 @@ export const DataTable: React.FC<DataTableProps> = ({
                           title="Klik untuk langsung memutar file video Google"
                         >
                           <Play className="w-3 h-3 fill-white shrink-0" />
-                          <span className="truncate max-w-[140px]">{r.docSanggahan}</span>
+                          <span className="truncate max-w-[130px]">{r.docSanggahan}</span>
                           <ExternalLink className="w-3 h-3 opacity-80 shrink-0" />
                         </button>
                       ) : (
                         <div className="flex items-center gap-1">
                           <span
-                            className="font-mono text-xs font-semibold text-slate-800 truncate max-w-[140px]"
+                            className="font-mono text-xs font-semibold text-slate-800 truncate max-w-[130px]"
                             title={r.docSanggahan}
                           >
                             {r.docSanggahan || '-'}
@@ -607,85 +697,27 @@ export const DataTable: React.FC<DataTableProps> = ({
                       )}
                     </td>
 
-                    {/* Sloc */}
+                    {/* Packer & Jam Packing */}
                     <td className="py-3 px-3.5 whitespace-nowrap">
-                      <span
-                        className={`font-mono text-xs font-semibold px-2 py-0.5 rounded-md ${
-                          r.sloc === '1655'
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                            : r.sloc === '1653'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {r.sloc || '-'}
-                      </span>
-                    </td>
-
-                    {/* Handover & Evidence */}
-                    <td className="py-3 px-3.5 whitespace-nowrap">
-                      {r.noHo && r.noHo !== 'Tidak ditemukan' && (
-                        <div className="font-semibold text-indigo-700 text-xs">
-                          HO #{r.noHo}
+                      <div className="font-medium text-slate-800">{r.namaPacker || '-'}</div>
+                      {r.tglJamPacking && r.tglJamPacking !== 'Tidak ditemukan' && (
+                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          {r.tglJamPacking}
                         </div>
                       )}
-                      {r.isDriveLink ? (
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (r.evidenceUrl && onPlayVideo) {
-                                onPlayVideo(r.evidenceUrl, r, 'Kolom M - CCTV Bukti');
-                              } else if (r.evidenceUrl) {
-                                window.open(r.evidenceUrl, '_blank');
-                              }
-                            }}
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline"
-                            title="Putar video CCTV Google Drive"
-                          >
-                            <Play className="w-2.5 h-2.5 fill-current" />
-                            <span>Putar Video</span>
-                          </button>
-                          <a
-                            href={r.evidenceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-slate-400 hover:text-slate-600 p-0.5"
-                            title="Buka Drive di tab baru"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </div>
-                      ) : r.isCctvFile ? (
-                        <div
-                          className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-700 mt-0.5 max-w-[120px] truncate"
-                          title={r.notedApaKee}
-                        >
-                          <Video className="w-3 h-3 text-sky-500 shrink-0" />
-                          <span className="truncate">{r.notedApaKee}</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 text-[10px]">-</span>
-                      )}
-                    </td>
-
-                    {/* Packer */}
-                    <td className="py-3 px-3.5 whitespace-nowrap font-medium text-slate-700">
-                      {r.namaPacker || '-'}
                     </td>
 
                     {/* Status */}
                     <td className="py-3 px-3.5 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                           isDone
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
                         }`}
                       >
-                        {r.status || 'Pending'}
+                        <span className={`w-1.5 h-1.5 rounded-full ${isDone ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        {r.status || 'pending'}
                       </span>
                     </td>
 

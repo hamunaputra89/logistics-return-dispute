@@ -85,6 +85,24 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <span className="text-slate-500 font-medium block mb-1">Marketplace Order ID</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-slate-900 text-sm">
+                    {record.orderId || '-'}
+                  </span>
+                  {record.orderId && record.orderId !== 'Tidak ditemukan' && (
+                    <button
+                      onClick={() => handleCopy('orderId', record.orderId)}
+                      className="p-1 text-slate-400 hover:text-blue-600 rounded transition-colors"
+                      title="Salin Order ID"
+                    >
+                      {copiedField === 'orderId' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
                 <span className="text-slate-500 font-medium block mb-1">Resi Original (Asli)</span>
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-slate-900 text-sm">
@@ -138,9 +156,9 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 sm:col-span-2">
                 <span className="text-slate-500 font-medium block mb-1">Lokasi Sloc (Storage)</span>
-                <span className="font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 inline-block">
+                <span className="font-mono font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200 inline-block">
                   {record.sloc || 'Unassigned'}
                 </span>
               </div>
@@ -187,11 +205,20 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
             </h4>
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-3">
               <div>
-                <span className="text-slate-500 font-medium block mb-1">Update Kasus</span>
+                <span className="text-slate-500 font-medium block mb-1">Keluhan / Kondisi Unit Diterima (Received)</span>
                 <p className="font-semibold text-slate-900 bg-white p-2.5 rounded-lg border border-slate-200">
-                  {record.updateCase || '-'}
+                  {record.receivedKetUnit || record.updateCase || '-'}
                 </p>
               </div>
+
+              {record.updateCase && record.updateCase !== record.receivedKetUnit && (
+                <div>
+                  <span className="text-slate-500 font-medium block mb-1">Update Kasus</span>
+                  <p className="font-semibold text-slate-800 bg-white p-2.5 rounded-lg border border-slate-200">
+                    {record.updateCase}
+                  </p>
+                </div>
+              )}
 
               {record.keterangan && (
                 <div>
@@ -297,18 +324,6 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
                     </div>
                   )}
                 </div>
-                <div>
-                  <span className="text-slate-500 font-medium block mb-1">Doc Handover</span>
-                  <span className="font-mono font-semibold text-indigo-700">
-                    {record.docHandover || '-'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-medium block mb-1">NO HO (Batch Serah Terima)</span>
-                  <span className="font-mono font-bold text-slate-900">
-                    {record.noHo ? `#${record.noHo}` : '-'}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -384,17 +399,11 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({ record, on
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
               Data Packing & Petugas Gudang
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
                 <span className="text-slate-500 font-medium block mb-1">Nama Packer</span>
                 <span className="font-semibold text-slate-900">
                   {record.namaPacker || '-'}
-                </span>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                <span className="text-slate-500 font-medium block mb-1">Status Print</span>
-                <span className="font-semibold text-emerald-700">
-                  {record.statusPrint || '-'}
                 </span>
               </div>
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
